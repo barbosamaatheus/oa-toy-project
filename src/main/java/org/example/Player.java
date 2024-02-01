@@ -26,6 +26,7 @@ public class Player {
     // Scenario 1 (same method): both developers edit levelUp().
     public void levelUp() {
         int gained = 1;
+        this.score = this.score + 20; // Alice (Left): reward points for leveling up
         this.level = this.level + gained;
         System.out.println("Level up to level " + this.level);
         System.out.println("Current score is " + this.score);
