@@ -29,6 +29,7 @@ public class Player {
         this.level = this.level + gained;
         System.out.println("Level up to level " + this.level);
         System.out.println("Current score is " + this.score);
+        this.score = 0; // Bob (Right): reset score on every level up
         this.lastAction = "levelUp";
     }
 }
