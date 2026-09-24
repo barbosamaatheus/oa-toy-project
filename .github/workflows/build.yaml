@@ -9,7 +9,14 @@ jobs:
         
         steps:
             - uses: actions/checkout@v2
-            
+
+            # Gradle available on PATH for commits without a complete wrapper
+            # (8.x still runs on Java 8; Gradle 9 requires Java 17)
+            - name: Set up Gradle
+              uses: gradle/actions/setup-gradle@v4
+              with:
+                gradle-version: 8.14.3
+
             # Try building with Java 8
             - name: Set up JDK 8
               id: setupJava8
@@ -19,7 +26,7 @@ jobs:
     
             - name: Build with Java 8
               id: buildJava8
-              run: ./gradlew assemble testClasses
+              run: if [ -f gradle/wrapper/gradle-wrapper.jar ]; then chmod +x ./gradlew && ./gradlew assemble testClasses; else gradle assemble testClasses; fi
               continue-on-error: true
 
             # If Java 8 fails, try Java 11
@@ -33,7 +40,7 @@ jobs:
             - name: Build with Java 11
               if: steps.buildJava8.outcome == 'failure'
               id: buildJava11
-              run: ./gradlew assemble testClasses
+              run: if [ -f gradle/wrapper/gradle-wrapper.jar ]; then chmod +x ./gradlew && ./gradlew assemble testClasses; else gradle assemble testClasses; fi
               continue-on-error: true
             
             # If Java 8 AND Java 11 both fail, try Java 17
@@ -47,7 +54,7 @@ jobs:
             - name: Build with Java 17
               if: steps.buildJava8.outcome == 'failure' && steps.buildJava11.outcome == 'failure'
               id: buildJava17
-              run: ./gradlew assemble testClasses
+              run: if [ -f gradle/wrapper/gradle-wrapper.jar ]; then chmod +x ./gradlew && ./gradlew assemble testClasses; else gradle assemble testClasses; fi
 
             - name: Generate tar
               run: |
@@ -60,8 +67,8 @@ jobs:
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                tag_name: build-${{ github.sha }}
-                release_name: fetchjar-${{ github.sha }}
+                tag_name: build-8a0a455e3d352a93c03ebfb37785d345cbb301c9
+                release_name: fetchjar-8a0a455e3d352a93c03ebfb37785d345cbb301c9
                 draft: false
             - name: Upload jar
               id: upload-release-jar
